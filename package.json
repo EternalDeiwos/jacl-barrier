@@ -1,0 +1,23 @@
+{
+  "name": "jacl-barrier",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/anvilresearch/jacl-barrier.git"
+  },
+  "keywords": [
+    "JACL",
+    "ABAC"
+  ],
+  "author": "Greg Linklater",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/anvilresearch/jacl-barrier/issues"
+  },
+  "homepage": "https://gitlab.com/anvilresearch/jacl-barrier#README"
+}
