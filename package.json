@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js",
+    "test": "mocha | bunyan -o short",
     "jsdoc": "jsdoc -c jsdoc.json -r"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/anvilresearch/jacl-barrier.git"
+    "url": "git+ssh://git@github.com/EternalDeiwos/jacl-barrier.git"
   },
   "keywords": [
     "JACL",
@@ -18,7 +18,13 @@
   "author": "Greg Linklater",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/anvilresearch/jacl-barrier/issues"
+    "url": "https://github.com/EternalDeiwos/jacl-barrier/issues"
   },
-  "homepage": "https://gitlab.com/anvilresearch/jacl-barrier#README"
+  "homepage": "https://github.com/EternalDeiwos/jacl-barrier#README",
+  "dependencies": {
+    "bunyan": "^1.8.1"
+  },
+  "devDependencies": {
+    "lodash": "^4.16.4"
+  }
 }
