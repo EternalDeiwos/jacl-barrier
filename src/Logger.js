@@ -46,6 +46,7 @@ const defaultLogger = name => {
  * Logging directory sanity check
  *
  * Make a logs directory with the permissions of 755 if it doesn't exist.
+ * @ignore
  */
 let stats = fs.statSync(LOG_DIR)
 if (!(stats && stats.isDirectory())) {
