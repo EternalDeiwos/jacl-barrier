@@ -1,0 +1,9 @@
+{
+  "provider": {
+    "url": "https://openid.ict.ru.ac.za"
+  },
+  "stores": [
+    "./store"
+  ],
+  "access": "myrule"
+}
