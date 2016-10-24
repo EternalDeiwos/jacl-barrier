@@ -1,9 +1,15 @@
 {
   "provider": {
-    "url": "https://openid.ict.ru.ac.za"
+    "name": "Identifier",
+    "signin": "https://id.rucus.me/connect/card",
+    "issuer": "https://id.rucus.me",
+    "client_id": "cbaff460-a4ea-40b1-aee1-d5893e6558f5",
+    "client_secret": "53a6326ac4475675867d",
+    "redirect_uris": ["https://barrier.redirect"],
+    "scope_attributes": {
+
+    }
   },
-  "stores": [
-    "./store"
-  ],
+  "stores": ["./test/store"],
   "access": "myrule"
 }
