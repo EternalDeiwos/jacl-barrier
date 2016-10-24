@@ -7,6 +7,12 @@
 const {JSONSchema} = require('json-document')
 
 /**
+ * Module Dependencies
+ * @ignore
+ */
+const ProviderSchema = require('./ProviderSchema')
+
+/**
  * JACL Barrier Schema
  */
 const schema = new JSONSchema({
@@ -14,36 +20,24 @@ const schema = new JSONSchema({
   properties: {
 
     /**
-     * provider
-     *
-     * @description
-     * Information about the identity provider including the issuer url and
-     * name.
+     * Provider
+     * @required
      */
-    provider: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        url: { type: 'string', format: 'uri'},
-        // Client metadata here...
-      },
-      required: ['url']
-    },
+    provider: ProviderSchema,
 
     /**
-     * stores
-     *
-     * @description
-     * Paths to various data stores containing attributes or attribute
-     * generators.
+     * Stores directories
+     * @type {string}
+     * @default []
      */
-    stores: {
-      type: 'array',
-    },
+    stores: { type: 'array', default: [] },
 
-    access: {
-      type: 'string'
-    }
+    /**
+     * Rule to enforce
+     * @type {string}
+     * @required
+     */
+    access: { type: 'string' }
   },
   required: ['provider', 'access']
 })
