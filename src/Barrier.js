@@ -9,7 +9,8 @@ const path = require('path')
 const {JSONDocument} = require('json-document')
 const Store = require('jacl-store')
 const AuthEngine = require('jacl-auth-engine')
-// const {RelyingParty} = require('oidc-rp')
+const fetch = require('node-fetch')
+const OIDC = require('./OIDCHandler')
 
 /**
  * Module Dependencies
@@ -54,13 +55,25 @@ class Barrier {
     } else {
       this.config = new Config(descriptor)
     }
-    log.debug({config: this.config}, 'Barrier configured')
+    log.debug('Barrier configured')
 
     this.store = new Store(this.config.stores)
-    log.debug({store: this.store}, 'Stores built')
+    log.debug('Stores built')
 
     this.engine = new AuthEngine(this.store.get('/rules'))
-    log.debug({rules: this.engine.rule()}, 'Engine built')
+    log.debug('Engine built')
+  }
+
+  makeDecision (attributes, identifier) {
+    let {access: rule} = this.config
+    let decision = this.engine.enforce(rule, attributes.subject, attributes.object, attributes.environment)
+    log.info({decision, identifier}, 'Access control decision')
+    return decision
+  }
+
+  authenticate (identifier, subjectAttributes) {
+    // log.debug({options: this.config.provider}, 'provider config')
+    return OIDC.handle(this, identifier, subjectAttributes, this.config.provider)
   }
 
   /**
@@ -74,18 +87,29 @@ class Barrier {
    */
   enforce (identifier) {
     let decision = false
-    let {access: ruleName} = this.config
+    let {engine, config, store} = this
+    let {access: ruleName} = config
     log.debug({rule: ruleName}, 'Starting access control')
 
-    let requiredAttributes = this.engine.attributesList(ruleName)
+    let subjectAttributes = engine.attributesList(ruleName, 'subject')
+    let requiredAttributes = subjectAttributes
+      .concat(engine.attributesList(ruleName, 'object'))
+      .concat(engine.attributesList(ruleName, 'environment'))
+    
     log.debug({attributes: requiredAttributes}, 'needed attributes')
 
-    let fetched = this.store.get(requiredAttributes)
-    log.debug({fetched}, 'fetched attributes')
+    let fetched = store.get(requiredAttributes)
+    log.debug('fetched store attributes')
 
-    decision = this.engine.enforce(ruleName, fetched.subject, fetched.object, fetched.environment)
-    log.info({decision, identifier}, 'Access control decision')
-    return decision
+    let store_subject = fetched.subject
+    return this.authenticate(identifier, subjectAttributes)
+      .then(args => {
+        let [_, __, subjectData] = args
+        fetched = Object.assign(fetched, subjectData || store_subject || {})
+        return Promise.resolve(this.makeDecision(fetched, identifier))
+      })
+      
+
   }
 
 }
