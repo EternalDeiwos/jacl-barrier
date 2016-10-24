@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha | bunyan -o short",
+    "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha | bunyan -o short",
     "jsdoc": "jsdoc -c jsdoc.json -r"
   },
   "repository": {
@@ -22,7 +22,9 @@
   },
   "homepage": "https://github.com/EternalDeiwos/jacl-barrier#README",
   "dependencies": {
-    "bunyan": "^1.8.1"
+    "bunyan": "^1.8.1",
+    "fetch-cookie": "^0.1.4",
+    "node-fetch": "^1.6.3"
   },
   "devDependencies": {
     "lodash": "^4.16.4"
