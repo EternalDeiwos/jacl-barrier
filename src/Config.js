@@ -55,8 +55,8 @@ class Config extends JSONDocument {
         ? file
         : path.join(cwd, file), 
         JSON.stringify(this))
-      return true
       log.info('Config saved')
+      return true
     } catch (e) {
       log.error(e)
     }
