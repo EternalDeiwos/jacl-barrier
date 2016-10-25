@@ -43,7 +43,7 @@ try {
     jar = new CookieJar()
   }
 } catch (e) {
-  log.error(e)
+  log.warn(e.message)
   jar = new CookieJar()
 }
 
@@ -121,7 +121,10 @@ class OIDCHandler {
 
     return Promise.all([
       Promise.resolve(oidc),
-      fetch(`${issuer}/.well-known/openid-configuration`)
+      fetch(`${issuer}/.well-known/openid-configuration`,
+      {
+        timeout: 300
+      }).catch(e => Promise.reject(e))
     ])
   }
 
@@ -322,7 +325,7 @@ class OIDCHandler {
     let pointers = oidc.subjectAttributes
     let subject = {}
 
-    log.debug('Validating Userinfo against required fields')
+    log.debug({userinfo}, 'Validating Userinfo against required fields')
     oidc.userinfo = userinfo
 
     try {
