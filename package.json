@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha | bunyan -o short",
+    "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha | bunyan -o short -l error",
     "jsdoc": "jsdoc -c jsdoc.json -r"
   },
   "repository": {
