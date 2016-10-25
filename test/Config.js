@@ -35,7 +35,7 @@ const log = Logger.getLogger(LOG_NAME)
 /**
  *
  */
-describe.only('Config', () => {
+describe('Config', () => {
   const INVALID_PATH = './invalid_path/my_config.json'
   const INVALID_ABS_PATH = '/invalid_path/my_config.json'
   const VALID_PATH = './my_config.json'
