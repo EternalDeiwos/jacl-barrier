@@ -16,48 +16,10 @@ const bunyan = require('bunyan')
 const LOG_DIR = path.join(cwd, 'logs')
 
 /**
- * Helpers
- * @ignore
- */
-const defaultLogLevel = () => {
-  return process.env.ENV && process.env.ENV.toLowerCase() === 'production'
-    ? bunyan.INFO
-    : bunyan.DEBUG
-}
-
-const defaultLogger = name => {
-  let level = defaultLogLevel()
-  return {
-    name,
-    streams: [
-      {
-        level,
-        path: path.join(LOG_DIR, `${name}.log`)
-      },
-      {
-        level,
-        stream: process.stdout
-      }
-    ]
-  }
-}
-
-/**
- * Logging directory sanity check
- *
- * Make a logs directory with the permissions of 755 if it doesn't exist.
- * @ignore
- */
-let stats = fs.statSync(LOG_DIR)
-if (!(stats && stats.isDirectory())) {
-  fs.mkdirSync(LOG_DIR, 0o755)
-}
-
-/**
  * Globals
  * @ignore
  */
-let loggers = {}
+let log, loggers = {}
 
 /**
  * Logger
@@ -66,6 +28,81 @@ let loggers = {}
  * Handles the creation, caching and namespacing of bunyan loggers
  */
 class Logger {
+
+  /**
+   * Initialize
+   * @ignore
+   */
+  static init () {
+    Logger.initDir(LOG_DIR)
+    loggers.main = bunyan.createLogger(Logger.defaultLogger('main'))
+    loggers.bunyan = bunyan.createLogger(Logger.defaultLogger('bunyan'))
+    log = loggers.bunyan
+    log.addSerializers(Logger.loggersSerializer())
+  }
+
+  static loggersSerializer () {
+    return {
+      loggers: logger_container => {
+        let ret = {}
+        Object.keys(logger_container).forEach(key => {
+          ret[key] = logger_container[key].level()
+        })
+        return ret
+      }
+    }
+  }
+
+  /**
+   * Initialize Logging Directory
+   * @ignore
+   */
+  static initDir (dir) {
+    let stats, err, mkdir = () => {
+      fs.mkdirSync(dir, 0o755)
+    }
+
+    try {
+      stats = fs.statSync(dir)
+    } catch (e) { 
+      return mkdir()
+    }
+
+    if (!(stats && stats.isDirectory())) {
+      return mkdir()
+    }
+  }
+
+  /**
+   * Default Log Level Helper
+   * @ignore
+   */
+  static defaultLogLevel () {
+    return process.env.ENV && process.env.ENV.toLowerCase() === 'production'
+      ? bunyan.INFO
+      : bunyan.DEBUG
+  }
+
+  /**
+   * Default Logger Helper
+   * @ignore
+   */
+  static defaultLogger (name) {
+    let level = Logger.defaultLogLevel()
+    return {
+      name,
+      streams: [
+        {
+          level,
+          path: path.join(LOG_DIR, `${name}.log`)
+        },
+        {
+          level,
+          stream: process.stdout
+        }
+      ]
+    }
+  }
 
   /**
    * Get Logger
@@ -77,106 +114,107 @@ class Logger {
    * @return {Logger}
    */
   static getLogger(opts) {
-    if (!opts) {
+    if (opts === undefined) {
       // get default logger
       log.trace('returning default logger')
       return loggers.main
-    
     } else if (typeof opts === 'string') {
-      // get logger based on namespacing
-      if (loggers[opts]) {
-        log.trace('logger exists, returning')
-        return loggers[opts]
-      } else if (opts.indexOf(':') > -1) {
-        log.trace({query: opts}, 'creating namespaced logger')
-        let ref = []
-        let current = null
-        let hierarchy = opts.split(':')
-        hierarchy.forEach(scope => {
-          ref.push(scope)
-          let namespace = ref.join(':')
-          if (loggers[namespace]) {
-            current = loggers[namespace]
-          } else {
-            loggers[namespace] = bunyan.createLogger(defaultLogger(namespace))
-          }
-
-        })
-        return loggers[opts]
-
-      } else {
-        log.trace({query: opts}, 'creating logger')
-        let logger = bunyan.createLogger(defaultLogger(opts))
-        loggers[opts] = logger
-        return logger
-      }
-    
+      return Logger.getLoggerByString(opts)
     } else if (typeof opts === 'object') {
-      // get new logger based on a descriptor object passed in
-      log.trace('creating customised logger')
-      if (opts.name) {
-        let level, stream = null
-        if (opts.level) {
-          level = opts.level
-          delete opts.level
-        } else {
-          level = defaultLogLevel()
-        }
+      return Logger.getLoggerByDescriptor(opts)
+    }
 
-        if (opts.stream) {
-          if (opts.stream != process.stdout) {
-            stream = opts.stream
-          }
-          delete opts.stream
-        }
+    log.error({opts}, new Error('Invalid logger requested'))
+  }
 
-        let standardStreams = [
+  static getLoggerByString (opts) {
+    if (opts.indexOf(':') > -1) {
+      return Logger.createNamespacedLogger(opts)
+    } else {
+      return Logger.getOrCreateLogger(opts)
+    }
+  }
+
+  static createNamespacedLogger (opts) {
+    // get logger based on namespacing
+    log.trace({name: opts, namespace: opts.split(':')}, 'creating namespaced logger')
+    let ref = []
+    let current = null
+    let hierarchy = opts.split(':')
+    hierarchy.forEach(scope => {
+      ref.push(scope)
+      let namespace = ref.join(':')
+      current = Logger.getOrCreateLogger(namespace)
+    })
+    return loggers[opts]
+  }
+
+  static getOrCreateLogger (name) {
+    if (loggers[name]) {
+      log.trace({name}, 'logger exists, returning')
+      return loggers[name]
+    } else {
+      log.trace({name}, 'creating logger')
+      let logger = bunyan.createLogger(Logger.defaultLogger(name))
+      loggers[name] = logger
+      return logger
+    }
+  }
+
+  static getLoggerByDescriptor (opts) {
+    log.warn('creating custom logger, custom loggers are not cached')
+    let {stream, streams, name, level} = opts
+
+    if (!level) {
+      level = Logger.defaultLogLevel()
+    }
+
+    if (name) {
+      let descriptor = {
+        name,
+        level,
+        streams: [
           {
             level,
             stream: process.stdout
           },
           {
             level,
-            path: path.join(LOG_DIR, `${opts.name}.log`),
+            path: path.join(LOG_DIR, `${name}.log`),
           }
         ]
-
-        if (stream) {
-          standardStreams.push({
-            level,
-            stream
-          })
-        }
-
-        opts.streams = standardStreams
-        return bunyan.createLogger(opts)
       }
+      
+      if (stream && stream != process.stdout) {
+        descriptor.streams.push({
+          level,
+          stream
+        })
+      }
+
+      if (streams && Array.isArray(streams)) {
+        streams.forEach(s => {
+          if (s && s.stream != process.stdout) {
+            descriptor.streams.push({
+              level,
+              stream
+            })
+          }
+        })
+      }
+
+      return bunyan.createLogger(descriptor)
     }
 
-    log.error(new Error('Invalid logger'))
+    log.error({opts}, new Error('Log name required'))
+    return null
   }
 
 }
 
 /**
- * Default loggers
- * @ignore
- */
-loggers.main = bunyan.createLogger(defaultLogger('main'))
-loggers.bunyan = bunyan.createLogger(defaultLogger('bunyan'))
-let log = loggers.bunyan
-log.addSerializers({ 
-  loggers: logger => {
-    let ret = {}
-    Object.keys(logger).forEach(key => {
-      ret[key] = logger[key].level()
-    })
-    return ret
-  }
-})
-
-/**
  * Exports
  * @ignore
  */
+Logger.init()
 module.exports = Logger
