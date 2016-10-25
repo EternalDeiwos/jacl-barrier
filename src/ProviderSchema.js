@@ -61,7 +61,7 @@ const schema = new JSONSchema({
      */
     scope_attributes: { type: 'object', default: {} }
   },
-  required: ['issuer', 'client_id', 'redirect_uris']
+  required: ['issuer', 'client_id', 'redirect_uris', 'client_secret']
 })
 
 /**
