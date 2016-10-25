@@ -4,3 +4,4 @@ logs
 /config
 /store
 cookie.jar.json
+coverage

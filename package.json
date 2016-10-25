@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "coverage": "NODE_TLS_REJECT_UNAUTHORIZED=0 istanbul cover _mocha -- test",
     "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 mocha | bunyan -o short -l error",
     "jsdoc": "jsdoc -c jsdoc.json -r"
   },
@@ -27,6 +28,11 @@
     "node-fetch": "^1.6.3"
   },
   "devDependencies": {
-    "lodash": "^4.16.4"
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "lodash": "^4.16.4",
+    "mocha": "^3.1.2",
+    "sinon": "^1.17.6",
+    "sinon-chai": "^2.8.0"
   }
 }
