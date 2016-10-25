@@ -6,16 +6,19 @@
 const cwd = process.cwd()
 const path = require('path')
 const chai = require('chai')
+const sinon = require('sinon')
+const sinonChai = require('sinon-chai')
 const chaiAsPromised = require('chai-as-promised')
 const _ = require('lodash')
-const fetch = require('node-fetch')
 
 /**
  * Assertions
  */
 chai.use(chaiAsPromised)
+chai.use(sinonChai)
 chai.should()
 let expect = chai.expect
+
 
 /**
  * Constants
@@ -31,18 +34,15 @@ const Barrier = require('../src/Barrier')
 /**
  *
  */
-describe('Barrier', () => {
+describe.skip('Barrier', () => {
   let barrier
   before(() => {
     barrier = new Barrier(CONFIG_PATH)
   })
   
-  it('should be true', (done) => {
+  it('should be true', function (done) {
+    this.timeout(0)
     let promise = barrier.enforce(42)
-    promise.should.be.fulfilled
-    promise.should.eventually.equal(true).notify(() => {
-      console.error(promise)
-      done()
-    })
+    promise.should.eventually.be.true.notify(done)
   })
 })
