@@ -24,7 +24,8 @@ let expect = chai.expect
  * Constants
  */
 const STORE_DATA_DIR = './test/store'
-const CONFIG_PATH = './test/config/dev.json'
+const POSITIVE_CONFIG_PATH = './test/config/dev.json'
+const NEGATIVE_CONFIG_PATH = './test/config/dev_deny.json'
 
 /**
  * Code under test
@@ -34,15 +35,33 @@ const Barrier = require('../src/Barrier')
 /**
  *
  */
-describe.skip('Barrier', () => {
+describe('Barrier', () => {
   let barrier
-  before(() => {
-    barrier = new Barrier(CONFIG_PATH)
-  })
-  
-  it('should be true', function (done) {
+
+  describe('Integration', function () {
     this.timeout(0)
-    let promise = barrier.enforce(42)
-    promise.should.eventually.be.true.notify(done)
-  })
+
+    describe('positive rule', function () {
+      before(() => {
+        barrier = new Barrier(POSITIVE_CONFIG_PATH)
+      })
+
+      it('should allow access', function (done) {
+        let promise = barrier.enforce(42)
+        promise.should.eventually.be.true.notify(done)
+      })
+    })
+
+    describe('negative rule', function () {
+      before(() => {
+        barrier = new Barrier(NEGATIVE_CONFIG_PATH)
+      })
+
+      it('should deny access', function (done) {
+        let promise = barrier.enforce(42)
+        promise.should.eventually.be.false.notify(done)
+      })
+    })
+
+  })  
 })
