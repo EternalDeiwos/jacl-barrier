@@ -128,7 +128,7 @@ class OIDCHandler {
       OIDCHandler.fetch(`${issuer}/.well-known/openid-configuration`,
       {
         timeout: 400
-      }).catch(e => Promise.reject(e))
+      })
     ])
   }
 
