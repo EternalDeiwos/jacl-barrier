@@ -123,7 +123,7 @@ class OIDCHandler {
       Promise.resolve(oidc),
       fetch(`${issuer}/.well-known/openid-configuration`,
       {
-        timeout: 300
+        timeout: 500
       }).catch(e => Promise.reject(e))
     ])
   }
