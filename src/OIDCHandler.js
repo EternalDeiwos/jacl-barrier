@@ -108,6 +108,10 @@ class OIDCHandler {
       })
   }
 
+  static fetch (url, opts) {
+    return fetch(url, opts)
+  }
+
   constructor (barrier, identifier, subjectAttributes, options) {
     this.barrier = barrier
     this.identifier = identifier
@@ -121,9 +125,9 @@ class OIDCHandler {
 
     return Promise.all([
       Promise.resolve(oidc),
-      fetch(`${issuer}/.well-known/openid-configuration`,
+      OIDCHandler.fetch(`${issuer}/.well-known/openid-configuration`,
       {
-        timeout: 500
+        timeout: 400
       }).catch(e => Promise.reject(e))
     ])
   }
@@ -145,7 +149,7 @@ class OIDCHandler {
 
     return Promise.all([
       Promise.resolve(oidc),
-      fetch(oidc.options.jwks_uri)
+      OIDCHandler.fetch(oidc.options.jwks_uri)
     ])
   }
 
@@ -178,7 +182,7 @@ class OIDCHandler {
 
     return Promise.all([
       Promise.resolve(oidc),
-      fetch(signin + '?' + querystring.stringify({
+      OIDCHandler.fetch(signin + '?' + querystring.stringify({
         response_type: 'code',
         scope: ABAC_SCOPES,
         client_id,
@@ -206,7 +210,7 @@ class OIDCHandler {
 
     return Promise.all([
       Promise.resolve(oidc),
-      fetch(signin + '/callback?' + querystring.stringify({
+      OIDCHandler.fetch(signin + '/callback?' + querystring.stringify({
         identifier
       }), {
         headers: {
@@ -255,7 +259,7 @@ class OIDCHandler {
 
     return Promise.all([
       Promise.resolve(oidc),
-      fetch(oidc.options.token_endpoint, 
+      OIDCHandler.fetch(oidc.options.token_endpoint, 
       {
         method: 'POST',
         body,
@@ -311,7 +315,7 @@ class OIDCHandler {
 
     return Promise.all([
       Promise.resolve(oidc),
-      fetch(oidc.options.userinfo_endpoint,
+      OIDCHandler.fetch(oidc.options.userinfo_endpoint,
       {
         headers: {
           Authorization: `Bearer ${access_token.segments.join('.')}`
