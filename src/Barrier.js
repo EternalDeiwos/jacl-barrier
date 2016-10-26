@@ -41,14 +41,18 @@ class Barrier {
    * object or path to a file containing a config descriptor object.
    */
   constructor (descriptor) {
+    if (!descriptor) {
+      throw new Error('Barrier config required')
+    }
+
     if (typeof descriptor === 'string') {
       try {
-        let config = require(path.join(cwd, descriptor))
         log.debug({path: descriptor}, 'importing config')
+        let config = require(path.join(cwd, descriptor))
         this.config = new Config(config)
       } catch (e) {
         log.error(e)
-        process.exit(1)
+        throw e
       }
     } else if (descriptor instanceof Config) {
       this.config = descriptor
