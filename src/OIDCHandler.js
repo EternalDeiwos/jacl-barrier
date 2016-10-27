@@ -126,9 +126,7 @@ class OIDCHandler {
     return Promise.all([
       Promise.resolve(oidc),
       OIDCHandler.fetch(`${issuer}/.well-known/openid-configuration`,
-      {
-        timeout: 400
-      })
+        { timeout: 0 })
     ])
   }
 
@@ -216,7 +214,8 @@ class OIDCHandler {
         headers: {
           'upgrade-insecure-requests': '1'
         },
-        redirect: 'manual'
+        redirect: 'manual',
+        timeout: 0
       })
     ]) 
   }
