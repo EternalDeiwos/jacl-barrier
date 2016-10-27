@@ -51,9 +51,9 @@ describe('Barrier', () => {
   let barrier
 
   beforeEach(() => {
-    sinon.stub(log, 'debug')
-    sinon.stub(log, 'info')
-    sinon.stub(log, 'error')
+    sinon.spy(log, 'debug')
+    sinon.spy(log, 'info')
+    sinon.spy(log, 'error')
   })
 
   afterEach(() => {
