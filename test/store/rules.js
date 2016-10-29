@@ -1,7 +1,7 @@
 
 module.exports = {
   rules: {
-    myrule: {
+    allow: {
       type: 'object',
       required: ['subject', 'environment'],
       properties: {

@@ -11,5 +11,5 @@
     }
   },
   "stores": ["./test/store"],
-  "access": "myrule"
+  "access": "allow"
 }
