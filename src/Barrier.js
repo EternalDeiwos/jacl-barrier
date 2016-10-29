@@ -90,6 +90,11 @@ class Barrier {
    * @return {boolean} 
    */
   enforce (identifier) {
+    if (typeof identifier !== 'number') {
+      log.warn({identifier}, 'Invalid identifier')
+      return Promise.reject(false)
+    }
+
     let decision = false
     let {engine, config, store} = this
     let {access: ruleName} = config

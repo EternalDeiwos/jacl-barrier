@@ -54,12 +54,14 @@ describe('Barrier', () => {
     sinon.spy(log, 'debug')
     sinon.spy(log, 'info')
     sinon.spy(log, 'error')
+    sinon.spy(log, 'warn')
   })
 
   afterEach(() => {
     log.debug.restore()
     log.info.restore()
     log.error.restore()
+    log.warn.restore()
   })
 
   describe.skip('Integration', function () {
@@ -207,6 +209,7 @@ describe('Barrier', () => {
 
   describe('enforce', () => {
     let identifier = 42
+    let badIdentifier = 'not a number'
     let result
     let authPromise = Promise.resolve([0, 0, { subject: { somekey: 'someval' }}])
     let attributePointers = ['/some/attr']
@@ -230,6 +233,16 @@ describe('Barrier', () => {
 
     it('should not log to info', () => {
       log.info.should.not.be.called
+    })
+
+    it('should log to warn if passed an invalid identifier', () => {
+      let result = barrier.enforce(badIdentifier)
+      log.warn.should.be.called
+    })
+
+    it('should reject if passed an invalid identifier', () => {
+      let result = barrier.enforce(badIdentifier)
+      result.should.eventually.be.false
     })
 
     it('should request the attribute list from the auth engine', () => {
